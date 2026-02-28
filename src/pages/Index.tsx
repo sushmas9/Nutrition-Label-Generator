@@ -6,30 +6,57 @@ import { Label } from "@/components/ui/label";
 import { NutritionLabel } from "@/components/NutritionLabel";
 import { Loader2 } from "lucide-react";
 
+interface PerServing {
+  calories: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+}
+
+export interface NutritionResult {
+  total_calories: number;
+  total_protein_g: number;
+  total_carbs_g: number;
+  total_fat_g: number;
+  per_serving: PerServing;
+  confidence_score: number;
+}
+
 const Index = () => {
   const [ingredients, setIngredients] = useState("");
   const [servings, setServings] = useState(1);
-  const [result, setResult] = useState<null | "loading" | object>(null);
+  const [result, setResult] = useState<NutritionResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = () => {
-    if (!ingredients.trim()) return;
-    setResult("loading");
+    setError(null);
+
+    if (!ingredients.trim()) {
+      setError("Please enter at least one ingredient.");
+      return;
+    }
+
+    setLoading(true);
+    setResult(null);
+
     setTimeout(() => {
       setResult({
-        calories: 420,
-        totalFat: 18,
-        saturatedFat: 6,
-        cholesterol: 85,
-        sodium: 680,
-        totalCarbs: 38,
-        dietaryFiber: 4,
-        totalSugars: 6,
-        protein: 28,
+        total_calories: 1200,
+        total_protein_g: 80,
+        total_carbs_g: 100,
+        total_fat_g: 40,
+        per_serving: {
+          calories: 300,
+          protein_g: 20,
+          carbs_g: 25,
+          fat_g: 10,
+        },
+        confidence_score: 85,
       });
-    }, 1200);
+      setLoading(false);
+    }, 1000);
   };
-
-  const isLoading = result === "loading";
 
   return (
     <div className="min-h-screen bg-background">
@@ -69,8 +96,14 @@ const Index = () => {
                 placeholder={"2 chicken breasts\n1 cup rice\n1 tbsp olive oil"}
                 className="min-h-[150px] resize-none font-mono text-sm leading-relaxed"
                 value={ingredients}
-                onChange={(e) => setIngredients(e.target.value)}
+                onChange={(e) => {
+                  setIngredients(e.target.value);
+                  if (error) setError(null);
+                }}
               />
+              {error && (
+                <p className="text-sm font-medium text-destructive">{error}</p>
+              )}
             </div>
 
             <div className="flex items-end gap-5">
@@ -89,11 +122,11 @@ const Index = () => {
               </div>
               <Button
                 onClick={handleGenerate}
-                disabled={!ingredients.trim() || isLoading}
+                disabled={loading}
                 className="flex-1 h-10"
                 size="default"
               >
-                {isLoading ? (
+                {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Generating…
@@ -106,7 +139,7 @@ const Index = () => {
           </div>
         </div>
 
-        <NutritionLabel result={result} servings={servings} />
+        <NutritionLabel result={result} loading={loading} servings={servings} />
       </main>
     </div>
   );
