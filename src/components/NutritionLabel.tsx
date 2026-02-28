@@ -15,21 +15,40 @@ interface Props {
   servings: number;
 }
 
-const Row = ({ label, value, unit = "g", bold = false, indent = false }: { label: string; value: number; unit?: string; bold?: boolean; indent?: boolean }) => (
-  <div className={`flex justify-between py-1 ${bold ? "font-semibold" : ""} ${indent ? "pl-4" : ""}`}>
+const Row = ({
+  label,
+  value,
+  unit = "g",
+  bold = false,
+  indent = false,
+}: {
+  label: string;
+  value: number;
+  unit?: string;
+  bold?: boolean;
+  indent?: boolean;
+}) => (
+  <div
+    className={`flex items-center justify-between py-1.5 ${bold ? "font-semibold" : "text-muted-foreground"} ${indent ? "pl-5" : ""}`}
+  >
     <span>{label}</span>
-    <span className="font-mono tabular-nums">{value}{unit}</span>
+    <span className="font-mono tabular-nums">
+      {value}
+      {unit}
+    </span>
   </div>
 );
 
 const Divider = ({ thick = false }: { thick?: boolean }) => (
-  <div className={`${thick ? "border-t-[6px]" : "border-t"} border-foreground`} />
+  <div
+    className={`${thick ? "border-t-4 border-foreground" : "border-t border-border"}`}
+  />
 );
 
 export const NutritionLabel = ({ result, servings }: Props) => {
   if (result === null) {
     return (
-      <div className="rounded-md border border-dashed p-8 text-center">
+      <div className="flex h-48 items-center justify-center rounded-lg border border-dashed">
         <p className="text-sm text-muted-foreground">
           Your nutrition label will appear here
         </p>
@@ -39,10 +58,11 @@ export const NutritionLabel = ({ result, servings }: Props) => {
 
   if (result === "loading") {
     return (
-      <div className="rounded-md border p-8 text-center">
-        <p className="text-sm text-muted-foreground animate-pulse">
+      <div className="flex h-48 items-center justify-center rounded-lg border">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
           Analyzing ingredients…
-        </p>
+        </div>
       </div>
     );
   }
@@ -50,21 +70,28 @@ export const NutritionLabel = ({ result, servings }: Props) => {
   const data = result as NutritionData;
 
   return (
-    <div className="rounded-md border-2 border-foreground p-4 font-mono text-sm">
-      <h2 className="text-2xl font-bold tracking-tight">Nutrition Facts</h2>
-      <Divider />
-      <p className="py-1 text-xs text-muted-foreground">
-        {servings} serving{servings !== 1 ? "s" : ""} per recipe
-      </p>
+    <div className="rounded-lg border bg-card p-6 shadow-sm">
+      <div className="mb-1 flex items-baseline justify-between">
+        <h2 className="font-mono text-lg font-bold tracking-tight">
+          Nutrition Facts
+        </h2>
+        <span className="text-xs text-muted-foreground">per serving</span>
+      </div>
       <Divider thick />
-      <div className="py-1">
+
+      <div className="py-3">
         <div className="flex items-baseline justify-between">
-          <span className="text-xs font-semibold">Calories</span>
-          <span className="text-3xl font-bold tabular-nums">{data.calories}</span>
+          <span className="text-sm font-medium text-muted-foreground">
+            Calories
+          </span>
+          <span className="font-mono text-4xl font-bold tabular-nums tracking-tighter">
+            {data.calories}
+          </span>
         </div>
       </div>
       <Divider thick />
-      <div className="space-y-0 text-xs">
+
+      <div className="py-1 text-sm">
         <Row label="Total Fat" value={data.totalFat} bold />
         <Divider />
         <Row label="Saturated Fat" value={data.saturatedFat} indent />
@@ -82,8 +109,10 @@ export const NutritionLabel = ({ result, servings }: Props) => {
         <Row label="Protein" value={data.protein} bold />
       </div>
       <Divider thick />
-      <p className="pt-2 text-[10px] text-muted-foreground">
-        * Values are AI-estimated and may vary.
+
+      <p className="mt-3 text-[11px] text-muted-foreground">
+        * {servings} serving{servings !== 1 ? "s" : ""} per recipe. Values are
+        AI-estimated and may vary.
       </p>
     </div>
   );
