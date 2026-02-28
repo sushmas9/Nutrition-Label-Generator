@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { NutritionLabel } from "@/components/NutritionLabel";
-import { Loader2 } from "lucide-react";
+import { Loader2, ImagePlus, X } from "lucide-react";
 
 interface PerServing {
   calories: number;
@@ -28,12 +28,45 @@ const Index = () => {
   const [result, setResult] = useState<NutritionResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please upload an image file.");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Image must be under 10MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      setImagePreview(base64);
+      setImageBase64(base64);
+      if (error) setError(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    setImageBase64(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleGenerate = async () => {
     setError(null);
 
-    if (!ingredients.trim()) {
-      setError("Please enter at least one ingredient.");
+    if (!ingredients.trim() && !imageBase64) {
+      setError("Please enter ingredients or upload a recipe image.");
       return;
     }
 
@@ -49,7 +82,11 @@ const Index = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ ingredients, servings }),
+          body: JSON.stringify({
+            ingredients: ingredients || undefined,
+            servings,
+            image: imageBase64 || undefined,
+          }),
         }
       );
 
@@ -85,13 +122,62 @@ const Index = () => {
             Nutrition Label Generator
           </h1>
           <p className="max-w-lg text-lg text-muted-foreground">
-            Turn any recipe into an instant macro breakdown. Paste your
-            ingredients below.
+            Turn any recipe into an instant macro breakdown. Paste ingredients
+            or upload a recipe image.
           </p>
         </div>
 
         <div className="mb-12 rounded-xl border border-border bg-card p-8 shadow-sm">
           <div className="space-y-6">
+            {/* Image upload */}
+            <div className="space-y-2.5">
+              <Label className="text-sm font-semibold text-foreground">
+                Recipe Image
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Upload a photo of your recipe or dish
+              </p>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+
+              {imagePreview ? (
+                <div className="relative w-full overflow-hidden rounded-lg border border-border">
+                  <img
+                    src={imagePreview}
+                    alt="Recipe preview"
+                    className="h-48 w-full object-cover"
+                  />
+                  <button
+                    onClick={removeImage}
+                    className="absolute right-2 top-2 rounded-full bg-background/80 p-1.5 text-foreground backdrop-blur-sm transition-colors hover:bg-background"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex h-32 w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-sm text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                >
+                  <ImagePlus className="h-5 w-5" />
+                  Click to upload image
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs font-medium text-muted-foreground">AND / OR</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+
+            {/* Text ingredients */}
             <div className="space-y-2.5">
               <Label htmlFor="ingredients" className="text-sm font-semibold text-foreground">
                 Ingredients
@@ -137,7 +223,7 @@ const Index = () => {
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Generating…
+                    Analyzing…
                   </>
                 ) : (
                   "Generate Label"
