@@ -54,6 +54,7 @@ serve(async (req) => {
 
     const jsonSchema = `Return ONLY valid JSON:
 {
+  "recipe_name": "string (short descriptive name for the dish/recipe)",
   "detected_ingredients": ["string with quantity", ...],
   "total_calories": number,
   "total_protein_g": number,

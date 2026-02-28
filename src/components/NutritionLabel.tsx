@@ -71,19 +71,28 @@ export const NutritionLabel = ({ result, loading, servings, ingredients }: Props
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm">
-      {/* Recipe / Ingredients header */}
-      {displayIngredients.length > 0 && (
+      {/* Recipe name & ingredients header */}
+      {(data.recipe_name || displayIngredients.length > 0) && (
         <div className="border-b border-border px-8 py-6">
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Recipe Ingredients
-          </h3>
-          <ul className="space-y-1">
-            {displayIngredients.map((item, i) => (
-              <li key={i} className="text-sm text-foreground">
-                {item}
-              </li>
-            ))}
-          </ul>
+          {data.recipe_name && (
+            <h3 className="text-lg font-bold tracking-tight text-foreground">
+              {data.recipe_name}
+            </h3>
+          )}
+          {displayIngredients.length > 0 && (
+            <div className={data.recipe_name ? "mt-3" : ""}>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Ingredients
+              </p>
+              <ul className="space-y-1">
+                {displayIngredients.map((item, i) => (
+                  <li key={i} className="text-sm text-foreground">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 
