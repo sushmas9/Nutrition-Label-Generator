@@ -59,23 +59,26 @@ export const NutritionLabel = ({ result, loading, servings, ingredients }: Props
   const data = result!;
   const ps = data.per_serving;
 
-  // Parse ingredients into a clean list
-  const ingredientList = ingredients
-    ?.trim()
-    .split(/\n/)
-    .map((s) => s.trim())
-    .filter(Boolean);
+  // Use AI-detected ingredients if available, otherwise fall back to user text
+  const displayIngredients =
+    data.detected_ingredients?.length > 0
+      ? data.detected_ingredients
+      : ingredients
+          ?.trim()
+          .split(/\n/)
+          .map((s) => s.trim())
+          .filter(Boolean) || [];
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm">
       {/* Recipe / Ingredients header */}
-      {ingredientList && ingredientList.length > 0 && (
+      {displayIngredients.length > 0 && (
         <div className="border-b border-border px-8 py-6">
           <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Recipe Ingredients
           </h3>
           <ul className="space-y-1">
-            {ingredientList.map((item, i) => (
+            {displayIngredients.map((item, i) => (
               <li key={i} className="text-sm text-foreground">
                 {item}
               </li>
