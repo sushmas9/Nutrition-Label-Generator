@@ -68,7 +68,7 @@ Instructions:
     "carbs_g": number,
     "fat_g": number
   },
-  "confidence_score": number,
+  "confidence_score": number (integer 0–100, NOT a decimal),
   "assumptions": ["string", ...]
 }
 
@@ -101,6 +101,11 @@ Servings: ${numServings}`,
 
     const jsonStr = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
     const result = JSON.parse(jsonStr);
+
+    // Normalize confidence_score: if AI returned 0-1 scale, convert to 0-100
+    if (result.confidence_score > 0 && result.confidence_score <= 1) {
+      result.confidence_score = Math.round(result.confidence_score * 100);
+    }
 
     // Validate parsed values
     if (
