@@ -21,6 +21,7 @@ serve(async (req) => {
       );
     }
 
+    console.log("Ingredients received:", ingredients);
     const numServings = Number(servings) || 1;
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
