@@ -13,7 +13,6 @@ const Index = () => {
   const handleGenerate = () => {
     if (!ingredients.trim()) return;
     setResult("loading");
-    // Simulated result after a brief delay
     setTimeout(() => {
       setResult({
         calories: 420,
@@ -30,59 +29,76 @@ const Index = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-start justify-center px-4 py-16 md:py-24">
-      <div className="w-full max-w-lg space-y-10">
-        {/* Header */}
-        <div className="space-y-2">
-          <h1 className="font-mono text-2xl font-semibold tracking-tight">
-            AI Nutrition Label Generator
+    <div className="min-h-screen bg-background">
+      {/* Top bar */}
+      <header className="border-b">
+        <div className="mx-auto flex h-14 max-w-2xl items-center px-6">
+          <span className="font-mono text-sm font-semibold tracking-tight">
+            NutriLabel
+          </span>
+          <span className="ml-2 rounded-full bg-foreground px-2 py-0.5 text-[10px] font-medium text-background">
+            AI
+          </span>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-2xl px-6 py-12 md:py-16">
+        {/* Hero */}
+        <div className="mb-10 space-y-3">
+          <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
+            Nutrition Label Generator
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Turn any recipe into instant macro breakdown
+          <p className="max-w-md text-base text-muted-foreground">
+            Turn any recipe into an instant macro breakdown. Paste your ingredients below.
           </p>
         </div>
 
-        {/* Form */}
-        <div className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="ingredients" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Ingredients (include quantities)
-            </Label>
-            <Textarea
-              id="ingredients"
-              placeholder={"2 chicken breasts\n1 cup rice\n1 tbsp olive oil\n..."}
-              className="min-h-[140px] resize-none font-mono text-sm"
-              value={ingredients}
-              onChange={(e) => setIngredients(e.target.value)}
-            />
-          </div>
+        {/* Form card */}
+        <div className="mb-8 rounded-lg border bg-card p-6 shadow-sm">
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="ingredients" className="text-sm font-medium">
+                Ingredients
+              </Label>
+              <p className="text-xs text-muted-foreground">Include quantities for each item</p>
+              <Textarea
+                id="ingredients"
+                placeholder={"2 chicken breasts\n1 cup rice\n1 tbsp olive oil"}
+                className="min-h-[130px] resize-none font-mono text-sm leading-relaxed"
+                value={ingredients}
+                onChange={(e) => setIngredients(e.target.value)}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="servings" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Servings
-            </Label>
-            <Input
-              id="servings"
-              type="number"
-              min={1}
-              value={servings}
-              onChange={(e) => setServings(Number(e.target.value))}
-              className="w-24 font-mono text-sm"
-            />
+            <div className="flex items-end gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="servings" className="text-sm font-medium">
+                  Servings
+                </Label>
+                <Input
+                  id="servings"
+                  type="number"
+                  min={1}
+                  value={servings}
+                  onChange={(e) => setServings(Number(e.target.value))}
+                  className="w-20 font-mono text-sm"
+                />
+              </div>
+              <Button
+                onClick={handleGenerate}
+                disabled={!ingredients.trim() || result === "loading"}
+                className="flex-1"
+                size="default"
+              >
+                {result === "loading" ? "Generating…" : "Generate Label"}
+              </Button>
+            </div>
           </div>
-
-          <Button
-            onClick={handleGenerate}
-            disabled={!ingredients.trim() || result === "loading"}
-            className="w-full"
-          >
-            {result === "loading" ? "Generating…" : "Generate Nutrition Label"}
-          </Button>
         </div>
 
         {/* Results */}
         <NutritionLabel result={result} servings={servings} />
-      </div>
+      </main>
     </div>
   );
 };
