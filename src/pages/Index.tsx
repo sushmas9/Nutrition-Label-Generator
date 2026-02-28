@@ -183,7 +183,7 @@ const Index = () => {
             {/* Text ingredients - collapsible */}
             <Collapsible>
               <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border border-border px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-accent">
-                Ingredients
+                Add Recipe Ingredients
                 <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
               </CollapsibleTrigger>
               <CollapsibleContent className="mt-3 space-y-2.5">
