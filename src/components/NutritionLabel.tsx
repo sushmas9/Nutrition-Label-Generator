@@ -89,20 +89,34 @@ export const NutritionLabel = ({ result, loading, servings }: Props) => {
       </div>
       <Divider thick />
 
-      <div className="mt-4 space-y-2">
+      <div className="mt-4 space-y-3">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>Total recipe calories</span>
           <span className="font-mono tabular-nums font-medium text-foreground">{data.total_calories}</span>
         </div>
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>AI confidence</span>
-          <span className="font-mono tabular-nums font-medium text-primary">{data.confidence_score}%</span>
+
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Confidence Score</span>
+            <span className="font-mono tabular-nums font-semibold text-primary">{data.confidence_score}/100</span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-500"
+              style={{ width: `${Math.min(data.confidence_score, 100)}%` }}
+            />
+          </div>
+          <p className="text-[10px] text-muted-foreground">Based on ingredient clarity</p>
         </div>
       </div>
 
-      <p className="mt-4 text-xs text-muted-foreground">
-        * {servings} serving{servings !== 1 ? "s" : ""} per recipe. Values are
-        AI-estimated and may vary.
+      <Divider />
+
+      <p className="mt-3 text-center text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+        Estimates only · Not medical advice
+      </p>
+      <p className="mt-1.5 text-center text-[10px] text-muted-foreground">
+        {servings} serving{servings !== 1 ? "s" : ""} per recipe
       </p>
     </div>
   );
