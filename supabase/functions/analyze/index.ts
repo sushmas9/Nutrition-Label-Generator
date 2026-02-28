@@ -100,6 +100,27 @@ Servings: ${numServings}`,
     const jsonStr = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
     const result = JSON.parse(jsonStr);
 
+    // Validate parsed values
+    if (
+      result.total_calories < 0 ||
+      result.total_protein_g < 0 ||
+      result.total_carbs_g < 0 ||
+      result.total_fat_g < 0 ||
+      result.confidence_score > 100
+    ) {
+      return new Response(
+        JSON.stringify({ error: "Invalid nutrition values returned by AI" }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Flag suspiciously low calories for multi-ingredient recipes
+    const ingredientCount = ingredients.trim().split(/\n|,/).filter((s: string) => s.trim()).length;
+    if (result.total_calories < 20 && ingredientCount > 2) {
+      result.confidence_score = Math.min(result.confidence_score, 20);
+      console.warn("Suspiciously low calories for multi-ingredient recipe, lowering confidence");
+    }
+
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
