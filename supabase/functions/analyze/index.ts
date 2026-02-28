@@ -12,16 +12,18 @@ serve(async (req) => {
   }
 
   try {
-    const { ingredients, servings } = await req.json();
+    const { ingredients, servings, image } = await req.json();
 
-    if (!ingredients || typeof ingredients !== "string" || !ingredients.trim()) {
+    const hasText = ingredients && typeof ingredients === "string" && ingredients.trim();
+    const hasImage = image && typeof image === "string";
+
+    if (!hasText && !hasImage) {
       return new Response(
-        JSON.stringify({ error: "Ingredients are required." }),
+        JSON.stringify({ error: "Ingredients text or recipe image is required." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("Ingredients received:", ingredients);
     const numServings = Number(servings) || 1;
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
@@ -29,34 +31,28 @@ serve(async (req) => {
       throw new Error("OPENAI_API_KEY is not configured");
     }
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0,
-        messages: [
-          {
-            role: "system",
-            content: `You are a precise nutrition calculation engine.
+    // Build user message content (text + optional image)
+    const userContent: any[] = [];
 
-Use standard USDA nutritional values for common foods.
+    if (hasImage) {
+      userContent.push({
+        type: "image_url",
+        image_url: { url: image, detail: "high" },
+      });
+      userContent.push({
+        type: "text",
+        text: hasText
+          ? `The user also provided these ingredients as text:\n${ingredients.trim()}\n\nUse both the image and the text. If they conflict, prefer the image.\nServings: ${numServings}`
+          : `Analyze this recipe image. Identify all visible ingredients and their approximate quantities.\nServings: ${numServings}`,
+      });
+    } else {
+      userContent.push({
+        type: "text",
+        text: `Recipe:\n${ingredients.trim()}\nServings: ${numServings}`,
+      });
+    }
 
-Instructions:
-- Calculate nutrition based strictly on quantities provided.
-- If unit is clear (g, cup, tbsp, oz), compute proportionally.
-- If unit is vague (bowl, spoon, piece), assume a standard US serving size, lower confidence_score, and add the assumption to the "assumptions" array.
-- Do NOT inflate estimates.
-- Do NOT guess exotic values.
-- Keep numbers realistic and conservative.
-- Include an "assumptions" array listing any assumptions made (e.g. "Assumed 1 bowl = 240g").`,
-          },
-          {
-            role: "user",
-            content: `Return ONLY valid JSON:
+    const jsonSchema = `Return ONLY valid JSON:
 {
   "total_calories": number,
   "total_protein_g": number,
@@ -70,11 +66,42 @@ Instructions:
   },
   "confidence_score": number (integer 0–100, NOT a decimal),
   "assumptions": ["string", ...]
-}
+}`;
 
-Recipe:
-${ingredients.trim()}
-Servings: ${numServings}`,
+    userContent.push({ type: "text", text: jsonSchema });
+
+    console.log("Analyzing with image:", hasImage, "text:", hasText);
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0,
+        max_tokens: 1000,
+        messages: [
+          {
+            role: "system",
+            content: `You are a precise nutrition calculation engine.
+
+Use standard USDA nutritional values for common foods.
+
+Instructions:
+- If an image is provided, carefully identify all ingredients and estimate quantities from the image.
+- Calculate nutrition based strictly on quantities provided or estimated.
+- If unit is clear (g, cup, tbsp, oz), compute proportionally.
+- If unit is vague (bowl, spoon, piece), assume a standard US serving size, lower confidence_score, and add the assumption to the "assumptions" array.
+- Do NOT inflate estimates.
+- Do NOT guess exotic values.
+- Keep numbers realistic and conservative.
+- Include an "assumptions" array listing any assumptions made (e.g. "Assumed 1 bowl = 240g", "Estimated 200g chicken from image").`,
+          },
+          {
+            role: "user",
+            content: userContent,
           },
         ],
       }),
@@ -122,7 +149,8 @@ Servings: ${numServings}`,
     }
 
     // Flag suspiciously low calories for multi-ingredient recipes
-    const ingredientCount = ingredients.trim().split(/\n|,/).filter((s: string) => s.trim()).length;
+    const ingredientText = ingredients || "";
+    const ingredientCount = ingredientText.trim().split(/\n|,/).filter((s: string) => s.trim()).length;
     if (result.total_calories < 20 && ingredientCount > 2) {
       result.confidence_score = Math.min(result.confidence_score, 20);
       console.warn("Suspiciously low calories for multi-ingredient recipe, lowering confidence");
