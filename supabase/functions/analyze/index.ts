@@ -41,13 +41,21 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are a precise nutrition estimation engine.",
+            content: `You are a precise nutrition calculation engine.
+
+Use standard USDA nutritional values for common foods.
+
+Instructions:
+- Calculate nutrition based strictly on quantities provided.
+- If unit is clear (g, cup, tbsp, oz), compute proportionally.
+- If unit is vague (bowl, spoon, piece), assume a standard US serving size and lower confidence_score.
+- Do NOT inflate estimates.
+- Do NOT guess exotic values.
+- Keep numbers realistic and conservative.`,
           },
           {
             role: "user",
-            content: `
-Estimate total and per-serving nutrition.
-Return ONLY valid JSON:
+            content: `Return ONLY valid JSON:
 {
   "total_calories": number,
   "total_protein_g": number,
@@ -61,10 +69,10 @@ Return ONLY valid JSON:
   },
   "confidence_score": number
 }
+
 Recipe:
 ${ingredients.trim()}
-Servings: ${numServings}
-`,
+Servings: ${numServings}`,
           },
         ],
       }),
