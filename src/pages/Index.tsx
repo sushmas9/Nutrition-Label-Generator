@@ -15,6 +15,7 @@ interface PerServing {
 }
 
 export interface NutritionResult {
+  detected_ingredients: string[];
   total_calories: number;
   total_protein_g: number;
   total_carbs_g: number;
