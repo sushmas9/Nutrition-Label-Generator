@@ -48,10 +48,11 @@ Use standard USDA nutritional values for common foods.
 Instructions:
 - Calculate nutrition based strictly on quantities provided.
 - If unit is clear (g, cup, tbsp, oz), compute proportionally.
-- If unit is vague (bowl, spoon, piece), assume a standard US serving size and lower confidence_score.
+- If unit is vague (bowl, spoon, piece), assume a standard US serving size, lower confidence_score, and add the assumption to the "assumptions" array.
 - Do NOT inflate estimates.
 - Do NOT guess exotic values.
-- Keep numbers realistic and conservative.`,
+- Keep numbers realistic and conservative.
+- Include an "assumptions" array listing any assumptions made (e.g. "Assumed 1 bowl = 240g").`,
           },
           {
             role: "user",
@@ -67,7 +68,8 @@ Instructions:
     "carbs_g": number,
     "fat_g": number
   },
-  "confidence_score": number
+  "confidence_score": number,
+  "assumptions": ["string", ...]
 }
 
 Recipe:
