@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { NutritionLabel } from "@/components/NutritionLabel";
-import { Loader2, ImagePlus, X } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Loader2, ImagePlus, X, ChevronDown } from "lucide-react";
 
 interface PerServing {
   calories: number;
@@ -177,28 +178,31 @@ const Index = () => {
               <div className="h-px flex-1 bg-border" />
             </div>
 
-            {/* Text ingredients */}
-            <div className="space-y-2.5">
-              <Label htmlFor="ingredients" className="text-sm font-semibold text-foreground">
+            {/* Text ingredients - collapsible */}
+            <Collapsible>
+              <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border border-border px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-accent">
                 Ingredients
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                Include quantities for each item
-              </p>
-              <Textarea
-                id="ingredients"
-                placeholder={"2 chicken breasts\n1 cup rice\n1 tbsp olive oil"}
-                className="min-h-[150px] resize-none font-mono text-sm leading-relaxed"
-                value={ingredients}
-                onChange={(e) => {
-                  setIngredients(e.target.value);
-                  if (error) setError(null);
-                }}
-              />
-              {error && (
-                <p className="text-sm font-medium text-destructive">{error}</p>
-              )}
-            </div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-3 space-y-2.5">
+                <p className="text-xs text-muted-foreground">
+                  Include quantities for each item
+                </p>
+                <Textarea
+                  id="ingredients"
+                  placeholder={"2 chicken breasts\n1 cup rice\n1 tbsp olive oil"}
+                  className="min-h-[150px] resize-none font-mono text-sm leading-relaxed"
+                  value={ingredients}
+                  onChange={(e) => {
+                    setIngredients(e.target.value);
+                    if (error) setError(null);
+                  }}
+                />
+              </CollapsibleContent>
+            </Collapsible>
+            {error && (
+              <p className="text-sm font-medium text-destructive">{error}</p>
+            )}
 
             <div className="flex items-end gap-5">
               <div className="space-y-2.5">
