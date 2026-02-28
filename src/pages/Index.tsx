@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { NutritionLabel } from "@/components/NutritionLabel";
+import { Loader2 } from "lucide-react";
 
 const Index = () => {
   const [ingredients, setIngredients] = useState("");
@@ -28,51 +29,53 @@ const Index = () => {
     }, 1200);
   };
 
+  const isLoading = result === "loading";
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Top bar */}
-      <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-2xl items-center px-6">
-          <span className="font-mono text-sm font-semibold tracking-tight">
+      <header className="border-b border-border bg-card">
+        <div className="mx-auto flex h-16 max-w-3xl items-center px-6">
+          <span className="font-mono text-sm font-semibold tracking-tight text-foreground">
             NutriLabel
           </span>
-          <span className="ml-2 rounded-full bg-foreground px-2 py-0.5 text-[10px] font-medium text-background">
+          <span className="ml-2.5 rounded-md bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
             AI
           </span>
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-6 py-12 md:py-16">
-        {/* Hero */}
-        <div className="mb-10 space-y-3">
-          <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
+      <main className="mx-auto max-w-3xl px-6 py-16 md:py-24">
+        <div className="mb-14 space-y-4">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl">
             Nutrition Label Generator
           </h1>
-          <p className="max-w-md text-base text-muted-foreground">
-            Turn any recipe into an instant macro breakdown. Paste your ingredients below.
+          <p className="max-w-lg text-lg text-muted-foreground">
+            Turn any recipe into an instant macro breakdown. Paste your
+            ingredients below.
           </p>
         </div>
 
-        {/* Form card */}
-        <div className="mb-8 rounded-lg border bg-card p-6 shadow-sm">
-          <div className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="ingredients" className="text-sm font-medium">
+        <div className="mb-12 rounded-xl border border-border bg-card p-8 shadow-sm">
+          <div className="space-y-6">
+            <div className="space-y-2.5">
+              <Label htmlFor="ingredients" className="text-sm font-semibold text-foreground">
                 Ingredients
               </Label>
-              <p className="text-xs text-muted-foreground">Include quantities for each item</p>
+              <p className="text-xs text-muted-foreground">
+                Include quantities for each item
+              </p>
               <Textarea
                 id="ingredients"
                 placeholder={"2 chicken breasts\n1 cup rice\n1 tbsp olive oil"}
-                className="min-h-[130px] resize-none font-mono text-sm leading-relaxed"
+                className="min-h-[150px] resize-none font-mono text-sm leading-relaxed"
                 value={ingredients}
                 onChange={(e) => setIngredients(e.target.value)}
               />
             </div>
 
-            <div className="flex items-end gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="servings" className="text-sm font-medium">
+            <div className="flex items-end gap-5">
+              <div className="space-y-2.5">
+                <Label htmlFor="servings" className="text-sm font-semibold text-foreground">
                   Servings
                 </Label>
                 <Input
@@ -81,22 +84,28 @@ const Index = () => {
                   min={1}
                   value={servings}
                   onChange={(e) => setServings(Number(e.target.value))}
-                  className="w-20 font-mono text-sm"
+                  className="w-24 font-mono text-sm"
                 />
               </div>
               <Button
                 onClick={handleGenerate}
-                disabled={!ingredients.trim() || result === "loading"}
-                className="flex-1"
+                disabled={!ingredients.trim() || isLoading}
+                className="flex-1 h-10"
                 size="default"
               >
-                {result === "loading" ? "Generating…" : "Generate Label"}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Generating…
+                  </>
+                ) : (
+                  "Generate Label"
+                )}
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Results */}
         <NutritionLabel result={result} servings={servings} />
       </main>
     </div>

@@ -1,3 +1,5 @@
+import { Loader2 } from "lucide-react";
+
 interface NutritionData {
   calories: number;
   totalFat: number;
@@ -29,7 +31,7 @@ const Row = ({
   indent?: boolean;
 }) => (
   <div
-    className={`flex items-center justify-between py-1.5 ${bold ? "font-semibold" : "text-muted-foreground"} ${indent ? "pl-5" : ""}`}
+    className={`flex items-center justify-between py-2 ${bold ? "font-semibold text-foreground" : "text-muted-foreground"} ${indent ? "pl-6" : ""}`}
   >
     <span>{label}</span>
     <span className="font-mono tabular-nums">
@@ -41,14 +43,14 @@ const Row = ({
 
 const Divider = ({ thick = false }: { thick?: boolean }) => (
   <div
-    className={`${thick ? "border-t-4 border-foreground" : "border-t border-border"}`}
+    className={`${thick ? "border-t-[3px] border-foreground" : "border-t border-border"}`}
   />
 );
 
 export const NutritionLabel = ({ result, servings }: Props) => {
   if (result === null) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-lg border border-dashed">
+      <div className="flex h-56 items-center justify-center rounded-xl border border-dashed border-border bg-card">
         <p className="text-sm text-muted-foreground">
           Your nutrition label will appear here
         </p>
@@ -58,9 +60,9 @@ export const NutritionLabel = ({ result, servings }: Props) => {
 
   if (result === "loading") {
     return (
-      <div className="flex h-48 items-center justify-center rounded-lg border">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+      <div className="flex h-56 items-center justify-center rounded-xl border border-border bg-card shadow-sm">
+        <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin text-primary" />
           Analyzing ingredients…
         </div>
       </div>
@@ -70,21 +72,21 @@ export const NutritionLabel = ({ result, servings }: Props) => {
   const data = result as NutritionData;
 
   return (
-    <div className="rounded-lg border bg-card p-6 shadow-sm">
-      <div className="mb-1 flex items-baseline justify-between">
-        <h2 className="font-mono text-lg font-bold tracking-tight">
+    <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
+      <div className="mb-2 flex items-baseline justify-between">
+        <h2 className="font-mono text-xl font-bold tracking-tight text-foreground">
           Nutrition Facts
         </h2>
-        <span className="text-xs text-muted-foreground">per serving</span>
+        <span className="text-xs font-medium text-muted-foreground">per serving</span>
       </div>
       <Divider thick />
 
-      <div className="py-3">
+      <div className="py-4">
         <div className="flex items-baseline justify-between">
-          <span className="text-sm font-medium text-muted-foreground">
+          <span className="text-sm font-semibold text-muted-foreground">
             Calories
           </span>
-          <span className="font-mono text-4xl font-bold tabular-nums tracking-tighter">
+          <span className="font-mono text-5xl font-bold tabular-nums tracking-tighter text-foreground">
             {data.calories}
           </span>
         </div>
@@ -110,7 +112,7 @@ export const NutritionLabel = ({ result, servings }: Props) => {
       </div>
       <Divider thick />
 
-      <p className="mt-3 text-[11px] text-muted-foreground">
+      <p className="mt-4 text-xs text-muted-foreground">
         * {servings} serving{servings !== 1 ? "s" : ""} per recipe. Values are
         AI-estimated and may vary.
       </p>
