@@ -237,7 +237,7 @@ const Index = () => {
           </div>
         </div>
 
-        <NutritionLabel result={result} loading={loading} servings={servings} />
+        <NutritionLabel result={result} loading={loading} servings={servings} ingredients={ingredients} />
       </main>
     </div>
   );
