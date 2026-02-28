@@ -28,22 +28,6 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are a nutrition analysis assistant. Given a list of ingredients with quantities, estimate the total macronutrient breakdown. Return ONLY a JSON object with this exact structure (no markdown, no explanation):
-{
-  "total_calories": <number>,
-  "total_protein_g": <number>,
-  "total_carbs_g": <number>,
-  "total_fat_g": <number>,
-  "per_serving": {
-    "calories": <number>,
-    "protein_g": <number>,
-    "carbs_g": <number>,
-    "fat_g": <number>
-  },
-  "confidence_score": <number 0-100>
-}
-The per_serving values should be the totals divided by the number of servings. Be as accurate as possible using standard nutritional databases.`;
-
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -52,9 +36,35 @@ The per_serving values should be the totals divided by the number of servings. B
       },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
+        temperature: 0,
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Ingredients:\n${ingredients.trim()}\n\nNumber of servings: ${numServings}` },
+          {
+            role: "system",
+            content: "You are a precise nutrition estimation engine.",
+          },
+          {
+            role: "user",
+            content: `
+Estimate total and per-serving nutrition.
+Return ONLY valid JSON:
+{
+  "total_calories": number,
+  "total_protein_g": number,
+  "total_carbs_g": number,
+  "total_fat_g": number,
+  "per_serving": {
+    "calories": number,
+    "protein_g": number,
+    "carbs_g": number,
+    "fat_g": number
+  },
+  "confidence_score": number
+}
+Recipe:
+${ingredients.trim()}
+Servings: ${numServings}
+`,
+          },
         ],
       }),
     });
