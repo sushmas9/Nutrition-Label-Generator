@@ -29,7 +29,7 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setError(null);
 
     if (!ingredients.trim()) {
@@ -40,22 +40,24 @@ const Index = () => {
     setLoading(true);
     setResult(null);
 
-    setTimeout(() => {
-      setResult({
-        total_calories: 1200,
-        total_protein_g: 80,
-        total_carbs_g: 100,
-        total_fat_g: 40,
-        per_serving: {
-          calories: 300,
-          protein_g: 20,
-          carbs_g: 25,
-          fat_g: 10,
-        },
-        confidence_score: 85,
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ingredients, servings }),
       });
+
+      if (!response.ok) {
+        throw new Error("Failed to analyze ingredients.");
+      }
+
+      const data: NutritionResult = await response.json();
+      setResult(data);
+    } catch (err: any) {
+      setError(err.message || "Something went wrong.");
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
